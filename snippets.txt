@@ -1,0 +1,33 @@
+quotes: list[dict] = [
+
+    {
+        "id": 1,
+        "author": "Kabir Marathe"
+        "content": "You have to start in the trenches to appreciate the penthouse"
+        "date": "April 2, 2025"
+    },
+    {
+        "id": 2,
+        "author": "Lilly Jesse"
+        "content": "I don't know how long it takes by road, I have only been there by tractor"
+        "date": "May 17, 2025"
+    }
+    {
+        "id": 3,
+        "author": "Mathew Gilbert"
+        "content": "Super mega gay. Like James Charles but half as cute and twice as gay"
+        "date": "August 22, 2025"
+    }
+    {
+        "id": 4,
+        "author": "Sonny Thurner"
+        "content": "You're schizophrenic, I'm gay"
+        "date": "January 24, 2026"
+    }
+    {
+        "id": 5,
+        "author": "Mathew Gilbert",
+        "content": " I have never had watermelon before",
+        "date": "July 1, 2026"
+    }
+]
