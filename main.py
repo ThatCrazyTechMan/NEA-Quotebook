@@ -38,3 +38,12 @@ async def home(request: Request):
         "index.html",
         {"title": "index"},
     )
+
+
+@app.get("/login", response_class=HTMLResponse)
+async def home(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "login.html",
+        {"title": "Login"},
+    )

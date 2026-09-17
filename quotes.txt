@@ -27,7 +27,7 @@ quotes: list[dict] = [
     {
         "id": 5,
         "author": "Mathew Gilbert",
-        "content": " I have never had watermelon before",
+        "content": "I have never had watermelon before",
         "date": "July 1, 2026"
     }
 ]
