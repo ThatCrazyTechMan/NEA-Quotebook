@@ -13,11 +13,11 @@ templates = Jinja2Templates(directory="templates")
 templates = Jinja2Templates(directory="templates")
 
 
-@app.get("/quotes", response_class=HTMLResponse)
+@app.get("/quote", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse(
         request,
-        "quotes.html",
+        "quote.html",
         {"title": "Home"},
     )
 
@@ -46,4 +46,13 @@ async def home(request: Request):
         request,
         "login.html",
         {"title": "Login"},
+    )
+
+
+@app.get("/results", response_class=HTMLResponse)
+async def home(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "search_results.html",
+        {"title": "All quotes"},
     )
