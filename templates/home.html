@@ -16,7 +16,7 @@
     <div class="container">
         <div class="col-md-2">
             <div class="btn-group">
-                <a href="http://localhost:8000/quotes" class="btn btn-primary">Quotes</a>
+                <a href="http://localhost:8000/quote" class="btn btn-primary">Quote</a>
                 <a href="http://localhost:8000/" class="btn btn-primary">Index</a>
                 <a class="btn btn-primary" href="http://localhost:8000/login" role="button">Login</a>
             </div>
@@ -35,6 +35,9 @@
                                aria-label="Search for tags, people or specific quotes">
                     </div>
                     <div class="col-md-auto">
+                        <a class="btn btn-outline-secondary btn-lg rounded-4" href="http://localhost:8000/results" role="button">Search</a>
+                    </div>
+                    <div class="col-md-auto">
                         <a href="#" class="link-secondary">Request to remove quote</a>
                     </div>
                 </div>
@@ -44,8 +47,8 @@
         <div class="row g-4">
             <!-- Start of div 1 -->
             <div class="col-md-3">
-                <div class="card h-100 border-2">
-                    <div class="card-title; text-center"><h4>Person of the month</h4></div>
+                <div class="card h-100 rounded-4 border-2">
+                    <div class="card-title; text-center"><h4 class="p-2">Person of the month</h4></div>
                     <img src="../static/dancing.gif" width="col-4"/>
                     <div class="card-body">
                         <ul class="list-group list-group-flush">
@@ -60,8 +63,8 @@
             <!-- End of div 1 -->
             <!-- Start of div 2 -->
             <div class="col-md-3 d-grid gap-4">
-                <div class="card border-2">
-                    <div class="card-title; text-center"><h4>Quote of the day</h4></div>
+                <div class="card rounded-4 border-2">
+                    <div class="card-title; text-center"><h4 class="p-2">Quote of the day</h4></div>
                     <div class="card-body">
                         <figure>
                             <blockquote class="blockquote">
@@ -73,8 +76,8 @@
                         </figure>
                     </div>
                 </div>
-                <div class="card border-2">
-                    <div class="card-title; text-center"><h4>Top 5 rated quotes</h4></div>
+                <div class="card rounded-4 border-2">
+                    <div class="card-title; text-center"><h4 class="p-2">Top 5 rated quotes</h4></div>
                     <div class="card-body">
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item">Bludclaart</li>
@@ -88,8 +91,8 @@
             <!-- End of div 2 -->
             <!-- Start of div 3-->
             <div class="col-md-6 d-grid gap-4">
-                <div class="card border-2 h-70">
-                    <div class="card-title text-center"><h4>Submit a quote</h4></div>
+                <div class="card rounded-4 border-2 h-70">
+                    <div class="card-title text-center"><h4 class="p-2">Submit a quote</h4></div>
                     <div class="card-body">
                         <div class="input-group mb-3">
                             <span class="input-group-text" id="basic-addon1">Person</span>
@@ -111,10 +114,11 @@
                             <input type="text" class="form-control" placeholder="" aria-label="Username"
                                    aria-describedby="basic-addon1">
                         </div>
+                        <a href="http://localhost:8000/home" class="btn btn-outline-primary">Submit</a>
                     </div>
                 </div>
-                <div class="card border-2">
-                    <div class="card-title text-center"><h4>Top tags</h4></div>
+                <div class="card rounded-4 border-2">
+                    <div class="card-title text-center"><h4 class="p-2">Top tags</h4></div>
                     <div class="card-body">
                         Bludclaart, Bludclaart, Bludclaart, Bludclaart
                     </div>
