@@ -10,8 +10,6 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-templates = Jinja2Templates(directory="templates")
-
 
 @app.get("/quote", response_class=HTMLResponse)
 async def home(request: Request):
