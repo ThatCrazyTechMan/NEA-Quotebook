@@ -12,13 +12,15 @@
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
         crossorigin="anonymous"></script>
 <!-- Start of template -->
+
 <a href="http://localhost:8000/home" class="btn btn-primary">Home</a>
 <a href="http://localhost:8000/" class="btn btn-primary">Index</a>
 <a class="btn btn-primary" href="http://localhost:8000/login" role="button">Login</a>
+<a class="btn btn-primary" href="http://localhost:8000/results" role="button">Search results</a>
 <div class="container d-flex min-vh-100 flex-column py-4">
     <div class="row mt-5">
         <div class="col-12">
-            <p class="text-end">DD/MM/YYYY</p>
+            <p class="text-end">{{quote.date}}</p>
         </div>
     </div>
     <div class="p-5 rounded-4 shadow-lg ">
@@ -26,58 +28,40 @@
             <div class="col-12">
                 <figure>
                     <blockquote class="blockquote fst-italic" style="font-size: 50pt">
-                        From the screen to the ring to the pen to the king
+                        {{ quote.content }}
                     </blockquote>
                 </figure>
             </div>
         </div>
         <div class="row">
-            <div class="col-6">
+            <div class="col-4">
                 <span class="badge rounded-pill text-bg-primary">Tag</span>
                 <span class="badge rounded-pill text-bg-primary">Tag</span>
                 <span class="badge rounded-pill text-bg-primary">Tag</span>
             </div>
-            <div class="col-6">
-                <p class="text-end" style="font-size: 20pt">- KSI in <cite>Thick of it</cite></p>
+            <div class="col-4">
+                <p> {{quote.context}} </p>
+            </div>
+            <div class="col-4">
+                <p class="text-end" style="font-size: 20pt">- {{quote.author}}</p>
             </div>
         </div>
     </div>
     <div class="row mt-auto">
         <div class="col-12">
-            <h3>Related Quotes:</h3>
+            <h3>From this author:</h3>
         </div>
     </div>
     <div class="row">
+        {% for r in related %}
         <div class="col-4">
             <div class="card rounded-4">
                 <div class="card-body">
-                    Bludclaart Bludclaart
-                </div>
-                <div class="card-footer">
-                    -Author
+                    {{ r.content }}
                 </div>
             </div>
         </div>
-        <div class="col-4">
-            <div class="card rounded-4">
-                <div class="card-body">
-                    Bludclaart Bludclaart
-                </div>
-                <div class="card-footer">
-                    -Author
-                </div>
-            </div>
-        </div>
-        <div class="col-4">
-            <div class="card rounded-4">
-                <div class="card-body">
-                    Bludclaart Bludclaart
-                </div>
-                <div class="card-footer">
-                    -Author
-                </div>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 </div>
 <!-- End of template -->

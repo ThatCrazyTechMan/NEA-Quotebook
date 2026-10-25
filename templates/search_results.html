@@ -27,18 +27,18 @@
     </div>
     <div class="container py-4">
         <div class="p-5 rounded-4 shadow-lg">
-            {% for i in range(4) %}
             <div class="row mt-4">
+                {% for q in quotes %}
                 <div class="col-6">
                     <div class="card rounded-4">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-8 text-truncate">
-                                    <h5>Bludclaart Bludclaart Bludclaart Bludclaart Bludclaart Bludclaart Bludclaart
-                                        Bludclaart Bludclaart Bludclaart </h5>
+                                    <h5>{{q.content}} </h5>
                                 </div>
                                 <div class="col-3 text-end">
-                                    <a href="http://localhost:8000/quote" class="btn btn-sm btn-primary">Go to
+                                    <a href="http://localhost:8000/quote/{{q.id}}" class="btn btn-sm btn-primary">Go
+                                        to
                                         quote</a>
                                 </div>
                             </div>
@@ -51,40 +51,17 @@
                                     <span class="badge rounded-pill text-bg-primary">Tag</span>
                                 </div>
                                 <div class="col-4">
-                                    <p class="text-center">DD/MM/YYYY</p>
+                                    <p class="text-center">{{q.date}}</p>
                                 </div>
                                 <div class="col-4">
-                                    <p class="text-end">- KSI in <cite>Thick of it</cite></p>
+                                    <p class="text-end">- {{q.author}}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-6">
-                    <div class="card rounded-4">
-                        <div class="card-body">
-                            <h5>Bludclaart Bludclaart Bludclaart</h5>
-                        </div>
-                        <div class="card-footer text-muted">
-                            <div class="row">
-                                <div class="col-4">
-                                    <span class="badge rounded-pill text-bg-primary">Tag</span>
-                                    <span class="badge rounded-pill text-bg-primary">Tag</span>
-                                    <span class="badge rounded-pill text-bg-primary">Tag</span>
-                                </div>
-                                <div class="col-4">
-                                    <p class="text-center">DD/MM/YYYY</p>
-                                </div>
-                                <div class="col-4">
-                                    <p class="text-end">- KSI in <cite>Thick of it</cite></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-
         </div>
     </div>
 </div>

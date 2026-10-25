@@ -1,22 +1,81 @@
-from urllib import request
+import json
+import random
+from datetime import date
+from pathlib import Path
+
 import templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
-import jinja2
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
+quotes = [
+    {
+        "id": 1,
+        "author": "Kabir Marathe",
+        "content": "You have to start in the trenches to appreciate the penthouse",
+        "date": "02/04/2025",
+        "context": "Said on the first week of school"
+    },
+    {
+        "id": 2,
+        "author": "Lilly Jesse",
+        "content": "I don't know how long it takes by road, I have only been there by tractor",
+        "date": "17/05/2025",
+        "context": "Didn't know how to go to her local pub by car"
+    },
+    {
+        "id": 3,
+        "author": "Mathew Gilbert",
+        "content": "Super mega gay. Like James Charles but half as cute and twice as gay",
+        "date": "22/08/2025",
+        "context": "His tragic story about how a crying girl who had just broke up with her boyfriend tried hitting on him and he panicked "
+    },
+    {
+        "id": 4,
+        "author": "Sonny Thurner",
+        "content": "You're schizophrenic, I'm gay",
+        "date": "24/01/2026",
+        "context": "God alone knows"
+    },
+    {
+        "id": 5,
+        "author": "Mathew Gilbert",
+        "content": "I have never had watermelon before",
+        "date": "01/07/2026",
+        "context": "Mat Gilbert on how many foods he has never tried, and he is the 'adventurous' member of his family"
+    },
+    {
+        "id": 6,
+        "author": "Louie Allerton",
+        "content": "Who is Josh Hall?",
+        "date": "16/09/2026",
+        "context": "Josh Hall was directly behind him at time of quoting"
+    }
+]
 
-@app.get("/quote", response_class=HTMLResponse)
-async def home(request: Request):
+
+@app.get("/quote/{quote_id}", response_class=HTMLResponse)
+async def home(request: Request, quote_id: int):
+    quote = None
+    for q in quotes:
+        if q["id"] == quote_id:
+            quote = q
+            break
+
+    related = []
+    for q in quotes:
+        if q["author"] == quote["author"] and q["id"] != quote["id"]:
+            related.append(q)
+
     return templates.TemplateResponse(
         request,
         "quote.html",
-        {"title": "Home"},
+        {"title": "quote", "quote": quote, "related": related},
     )
 
 
@@ -52,5 +111,5 @@ async def home(request: Request):
     return templates.TemplateResponse(
         request,
         "search_results.html",
-        {"title": "All quotes"},
+        {"title": "All quotes", "quotes": quotes},
     )
