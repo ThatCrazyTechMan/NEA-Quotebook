@@ -16,7 +16,6 @@
     <div class="container">
         <div class="col-md-2">
             <div class="btn-group">
-                <a href="http://localhost:8000/quote" class="btn btn-primary">Quote</a>
                 <a href="http://localhost:8000/" class="btn btn-primary">Index</a>
                 <a class="btn btn-primary" href="http://localhost:8000/login" role="button">Login</a>
             </div>
@@ -94,33 +93,17 @@
                 <div class="card rounded-4 border-2 h-70">
                     <div class="card-title text-center"><h4 class="p-2">Submit a quote</h4></div>
                     <div class="card-body">
-                        <div class="input-group mb-3">
-                            <span class="input-group-text" id="basic-addon1">Person</span>
-                            <input type="text" class="form-control" placeholder="" aria-label="Username"
-                                   aria-describedby="basic-addon1">
-                        </div>
-                        <div class="input-group mb-3">
-                            <span class="input-group-text" id="basic-addon1">Quote</span>
-                            <input type="text" class="form-control" placeholder="" aria-label="Username"
-                                   aria-describedby="basic-addon1">
-                        </div>
-                        <div class="input-group mb-3">
-                            <span class="input-group-text" id="basic-addon1">Tags</span>
-                            <input type="text" class="form-control" placeholder="" aria-label="Username"
-                                   aria-describedby="basic-addon1">
-                        </div>
-                        <div class="input-group mb-3">
-                            <span class="input-group-text" id="basic-addon1">People mentioned</span>
-                            <input type="text" class="form-control" placeholder="" aria-label="Username"
-                                   aria-describedby="basic-addon1">
-                        </div>
-                        <a href="http://localhost:8000/home" class="btn btn-outline-primary">Submit</a>
-                    </div>
-                </div>
-                <div class="card rounded-4 border-2">
-                    <div class="card-title text-center"><h4 class="p-2">Top tags</h4></div>
-                    <div class="card-body">
-                        Bludclaart, Bludclaart, Bludclaart, Bludclaart
+                        <form action="http://localhost:8000/submit" method="POST">
+                            <label for="author">Author</label>
+                            <input type="text" id="author" name="author"><br><br>
+                            <label for="quote">Quote</label>
+                            <input type="text" id="quote" name="quote"><br><br>
+                             <label for="context">Context</label>
+                            <input type="text" id="context" name="context"><br><br>
+                            <label for="date">Date</label>
+                            <input type="date" id="date" name="date"><br><br>
+                            <input type="submit" value="Submit">
+                        </form>
                     </div>
                 </div>
             </div>

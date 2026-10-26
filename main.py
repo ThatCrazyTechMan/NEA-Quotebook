@@ -5,9 +5,12 @@ from pathlib import Path
 
 import templates
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
-from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import FastAPI, Request, Form
 from fastapi.templating import Jinja2Templates
+from typing import Annotated
+import starlette.status as status
+import datetime
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -76,6 +79,29 @@ async def home(request: Request, quote_id: int):
         request,
         "quote.html",
         {"title": "quote", "quote": quote, "related": related},
+    )
+
+
+@app.post("/submit", response_class=HTMLResponse)
+async def submit(request: Request, author: Annotated[str, Form()], quote: Annotated[str, Form()],
+                 context: Annotated[str, Form()],
+                 date: Annotated[str, Form()]):
+    ids = []
+    for q in quotes:
+        ids.append(q["id"])
+    new_id = int(max(ids) + 1)
+
+    quote = {
+        "id": new_id,
+        "author": author,
+        "content": quote,
+        "date": date,
+        "context": context
+    }
+    quotes.append(quote)
+    return RedirectResponse(
+        '/quote/' + str(new_id),
+        status_code=int(302)
     )
 
 
