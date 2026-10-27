@@ -12,6 +12,17 @@ from typing import Annotated
 import starlette.status as status
 import datetime
 
+
+def appendToQuote(id, author, quote, date, context):
+    return {
+        "id": id,
+        "author": author,
+        "content": quote,
+        "date": date,
+        "context": context
+    }
+
+
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
@@ -90,7 +101,6 @@ async def submit(request: Request, author: Annotated[str, Form()], quote: Annota
     for q in quotes:
         ids.append(q["id"])
     new_id = int(max(ids) + 1)
-
     quote = {
         "id": new_id,
         "author": author,
@@ -132,10 +142,26 @@ async def home(request: Request):
     )
 
 
-@app.get("/results", response_class=HTMLResponse)
-async def home(request: Request):
+@app.get("/results/{search_term}", response_class=HTMLResponse)
+async def home(request: Request, search_term: str):
+    results = []
+    for q in quotes:
+        if search_term.lower() in q["content"].lower() or search_term.lower() in q["author"].lower():
+            results.append(q)
+
+    print(results)
+
     return templates.TemplateResponse(
         request,
         "search_results.html",
-        {"title": "All quotes", "quotes": quotes},
+        {"title": "All quotes", "quotes": results},
+    )
+
+
+@app.post("/search", response_class=HTMLResponse)
+async def submit(request: Request, search_term: Annotated[str, Form()]):
+    print(search_term)
+    return RedirectResponse(
+        '/results/' + str(search_term),
+        status_code=int(302)
     )
