@@ -29,13 +29,16 @@
                         <h4 class="mb-0">What say you, Kabir?</h4>
                     </div>
                     <div class="col-md">
-                        <form action="/search" method="POST">
-                            <label for="search">Search</label>
-                            <input type="text" id="search" name="search"><br><br>
+                        <form id="search_form" action="/search" method="POST">
+                            <label for="search"></label>
+                            <input type="text" required class="form-control form-control-lg rounded-pill px-4"
+                            placeholder="Search for tags, people or specific quotes"
+                            aria-label="Search for tags, people or specific quotes"
+                            id="search" name="search">
                         </form>
                     </div>
                     <div class="col-md-auto">
-                        <a class="btn btn-outline-secondary btn-lg rounded-4" href="http://localhost:8000/results" role="button">Search</a>
+                        <button type="submit" form="search_form" class="btn btn-outline-secondary btn-lg rounded-4">Search</button>
                     </div>
                     <div class="col-md-auto">
                         <a href="#" class="link-secondary">Request to remove quote</a>
@@ -49,13 +52,16 @@
             <div class="col-md-3">
                 <div class="card h-100 rounded-4 border-2">
                     <div class="card-title; text-center"><h4 class="p-2">Person of the month</h4></div>
-                    <img src="../static/dancing.gif" width="col-4"/>
+                    <h3 class="text-center">{{person_of_month}}</h3>
                     <div class="card-body">
                         <ul class="list-group list-group-flush">
-                            <li class="list-group-item">Bludclaart</li>
-                            <li class="list-group-item">Bludclaart</li>
-                            <li class="list-group-item">Bludclaart</li>
-                            <li class="list-group-item">Bludclaart</li>
+                            {% for q in POM_quotes %}
+                            <li class="list-group-item">
+                                <div class="col-xl-12">
+                                    <div class="card text-center h-150 rounded-4 border-2">{{q.content}}</div>
+                                </div>
+                            </li>
+                            {% endfor %}
                         </ul>
                     </div>
                 </div>
@@ -68,23 +74,18 @@
                     <div class="card-body">
                         <figure>
                             <blockquote class="blockquote">
-                                <p>"From the screen to the ring to the pen to the king"</p>
+                                <p>{{rand.content}}</p>
                             </blockquote>
                             <figcaption class="blockquote-footer">
-                                KSI in <cite title="Source Title">Thick of it</cite>
+                                {{rand.author}}
                             </figcaption>
                         </figure>
                     </div>
                 </div>
                 <div class="card rounded-4 border-2">
-                    <div class="card-title; text-center"><h4 class="p-2">Top 5 rated quotes</h4></div>
+                    <div class="card-title; text-center"><h4 class="p-2">Top 5 liked quotes</h4></div>
                     <div class="card-body">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item">Bludclaart</li>
-                            <li class="list-group-item">Bludclaart</li>
-                            <li class="list-group-item">Bludclaart</li>
-                            <li class="list-group-item">Bludclaart</li>
-                        </ul>
+                        <h1>Quotes do not have likes yet</h1>
                     </div>
                 </div>
             </div>
@@ -96,14 +97,21 @@
                     <div class="card-body">
                         <form action="http://localhost:8000/submit" method="POST">
                             <label for="author">Author</label>
-                            <input type="text" id="author" name="author"><br><br>
+                            <input type="text" id="author" required class="form-control form-control-lg rounded-pill px-4"
+                            placeholder="Author"
+                            aria-label="Author" name="author">
                             <label for="quote">Quote</label>
-                            <input type="text" id="quote" name="quote"><br><br>
+                            <input type="text" id="quote" required class="form-control form-control-lg rounded-pill px-4"
+                            placeholder="Quote"
+                            aria-label="Quote" name="quote">
                              <label for="context">Context</label>
-                            <input type="text" id="context" name="context"><br><br>
+                            <input type="text" id="context" required class="form-control form-control-lg rounded-pill px-4"
+                            placeholder="Context"
+                            aria-label="Context" name="context">
                             <label for="date">Date</label>
-                            <input type="date" id="date" name="date"><br><br>
-                            <input type="submit" value="Submit">
+                            <input type="date" id="date" required class="form-control form-control-lg rounded-pill px-4"
+                            aria-label="Date" name="date">
+                            <button type="submit" class="btn btn-outline-primary btn-sm rounded-4">Submit</button>
                         </form>
                     </div>
                 </div>

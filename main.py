@@ -9,18 +9,30 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi import FastAPI, Request, Form
 from fastapi.templating import Jinja2Templates
 from typing import Annotated
+from urllib.parse import quote
+import random
 import starlette.status as status
 import datetime
 
 
-def appendToQuote(id, author, quote, date, context):
-    return {
-        "id": id,
-        "author": author,
-        "content": quote,
-        "date": date,
-        "context": context
-    }
+def appendToQuote(quote_list, id, author, quote, date, context):
+    quote_list.append(
+        {
+            "id": id,
+            "author": author,
+            "content": quote,
+            "date": date,
+            "context": context
+        }
+    )
+
+
+# def quoteExists(quotelist, author, quote, date, context):
+# if quotelist["author"] == author and quotelist["quote"] == quote and quotelist["date"] == date and quotelist[
+#   "context"] == context:
+#    return True
+# else:
+#    return False
 
 
 app = FastAPI()
@@ -85,7 +97,6 @@ async def home(request: Request, quote_id: int):
     for q in quotes:
         if q["author"] == quote["author"] and q["id"] != quote["id"]:
             related.append(q)
-
     return templates.TemplateResponse(
         request,
         "quote.html",
@@ -100,15 +111,9 @@ async def submit(request: Request, author: Annotated[str, Form()], quote: Annota
     ids = []
     for q in quotes:
         ids.append(q["id"])
+
     new_id = int(max(ids) + 1)
-    quote = {
-        "id": new_id,
-        "author": author,
-        "content": quote,
-        "date": date,
-        "context": context
-    }
-    quotes.append(quote)
+    appendToQuote(quotes, new_id, author, quote, date, context)
     return RedirectResponse(
         '/quote/' + str(new_id),
         status_code=int(302)
@@ -117,10 +122,20 @@ async def submit(request: Request, author: Annotated[str, Form()], quote: Annota
 
 @app.get("/home", response_class=HTMLResponse)
 async def home(request: Request):
+    rand_quote = random.choice(quotes)
+    person_of_month = random.choice(quotes)["author"]
+    quotes_from_pom = []
+    counter = 0
+    for q in quotes:
+        if q["author"] == person_of_month and counter < 4:
+            quotes_from_pom.append(q)
+            counter += 1
+
+    print(rand_quote)
     return templates.TemplateResponse(
         request,
         "home.html",
-        {"title": "Home"},
+        {"title": "Home", "rand": rand_quote, "person_of_month": person_of_month, "POM_quotes": quotes_from_pom},
     )
 
 
@@ -142,11 +157,11 @@ async def home(request: Request):
     )
 
 
-@app.get("/results/{search_term}", response_class=HTMLResponse)
-async def home(request: Request, search_term: str):
+@app.get("/results/{search}", response_class=HTMLResponse)
+async def home(request: Request, search: str):
     results = []
     for q in quotes:
-        if search_term.lower() in q["content"].lower() or search_term.lower() in q["author"].lower():
+        if search.lower() in q["content"].lower() or search.lower() in q["author"].lower():
             results.append(q)
 
     print(results)
@@ -159,9 +174,18 @@ async def home(request: Request, search_term: str):
 
 
 @app.post("/search", response_class=HTMLResponse)
-async def submit(request: Request, search_term: Annotated[str, Form()]):
-    print(search_term)
+async def submit(request: Request, search: Annotated[str, Form()]):
+    print(search)
     return RedirectResponse(
-        '/results/' + str(search_term),
+        '/results/' + quote(search.strip(), safe=""),
         status_code=int(302)
+    )
+
+
+@app.get("/quote-exists", response_class=HTMLResponse)
+async def exists(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "quote_exists.html",
+        {"title": "Quote Exists"},
     )
