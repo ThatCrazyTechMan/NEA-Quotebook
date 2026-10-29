@@ -27,12 +27,30 @@ def appendToQuote(quote_list, id, author, quote, date, context):
     )
 
 
-# def quoteExists(quotelist, author, quote, date, context):
-# if quotelist["author"] == author and quotelist["quote"] == quote and quotelist["date"] == date and quotelist[
-#   "context"] == context:
-#    return True
-# else:
-#    return False
+def buildQuote(id, author, quote, date, context):
+    output = {
+        "id": id,
+        "author": author,
+        "content": quote,
+        "date": date,
+        "context": context
+    }
+    return output
+
+
+def quoteExists(quotelist, quote):
+    for q in quotelist:
+        if q["author"] == quote["author"] and q["content"] == quote["content"]:
+            return True
+    return False
+
+
+def searchQuotes(quotelist, search):
+    results = []
+    for q in quotelist:
+        if search.lower() in q["content"].lower() or search.lower() in q["author"].lower():
+            results.append(q)
+    return results
 
 
 app = FastAPI()
@@ -113,11 +131,24 @@ async def submit(request: Request, author: Annotated[str, Form()], quote: Annota
         ids.append(q["id"])
 
     new_id = int(max(ids) + 1)
-    appendToQuote(quotes, new_id, author, quote, date, context)
-    return RedirectResponse(
-        '/quote/' + str(new_id),
-        status_code=int(302)
-    )
+
+    quote_object = buildQuote(new_id, author, quote, date, context)
+
+    print(quote_object)
+    print(quoteExists(quotes, quote_object))
+
+    if not quoteExists(quotes, quote_object):
+        appendToQuote(quotes, new_id, author, quote, date, context)
+        return RedirectResponse(
+            '/quote/' + str(new_id),
+            status_code=int(302)
+        )
+    else:
+        return templates.TemplateResponse(
+            request,
+            "quote_exists.html",
+            {"title": "Quote Exists"}
+        )
 
 
 @app.get("/home", response_class=HTMLResponse)
@@ -159,11 +190,7 @@ async def home(request: Request):
 
 @app.get("/results/{search}", response_class=HTMLResponse)
 async def home(request: Request, search: str):
-    results = []
-    for q in quotes:
-        if search.lower() in q["content"].lower() or search.lower() in q["author"].lower():
-            results.append(q)
-
+    results = searchQuotes(quotes, search)
     print(results)
 
     return templates.TemplateResponse(
