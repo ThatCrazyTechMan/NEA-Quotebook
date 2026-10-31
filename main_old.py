@@ -3,6 +3,8 @@ import random
 from datetime import date
 from pathlib import Path
 
+from sqlalchemy.dialects.mysql import insert
+
 import templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -10,22 +12,21 @@ from fastapi import FastAPI, Request, Form
 from fastapi.templating import Jinja2Templates
 from typing import Annotated
 from urllib.parse import quote
-import random
-import starlette.status as status
-import datetime
+import databaseConnector
+from sqlalchemy import text
 
 
-def appendToQuote(quote_list, id, author, quote, date, context):
-    quote_list.append(
-        {
-            "id": id,
-            "author": author,
-            "content": quote,
-            "date": date,
-            "context": context
-        }
-    )
 
+def appendToQuote(author, quote, date, context):
+    session = databaseConnector.get_session()
+
+    sql_query = "INSERT INTO quote(author, content, date, context) VALUES(:author, :content, :date, :context) RETURNING id"
+    stmt = text(sql_query)
+    result = session.execute(stmt, {"author": author, "content": quote, "date": date, "context": context})
+    new_id=result.scalar_one()
+    session.commit()
+
+    return new_id
 
 def buildQuote(id, author, quote, date, context):
     output = {
@@ -38,21 +39,45 @@ def buildQuote(id, author, quote, date, context):
     return output
 
 
-def quoteExists(quotelist, quote):
-    for q in quotelist:
-        if q["author"] == quote["author"] and q["content"] == quote["content"]:
-            return True
-    return False
+def quoteExists(content, author):
+       session = databaseConnector.get_session()
+       sql_query = "SELECT COUNT(*) FROM quote WHERE content = :content AND author = :author"
+       stmt = text(sql_query)
+       result = session.execute(stmt, {"author": author, "content": content})
+       result = result.scalar_one()
+       session.commit()
+       print(result)
+       if result != 0:
+           return True
+       else:
+           return False
 
 
-def searchQuotes(quotelist, search):
-    results = []
-    for q in quotelist:
-        if search.lower() in q["content"].lower() or search.lower() in q["author"].lower():
-            results.append(q)
-    return results
+def searchQuotes(search):
+    session = databaseConnector.get_session()
+    search = f"%{search}%"
+    sql_query = "SELECT * FROM quote WHERE content ILIKE :search OR author ILIKE :search"
+    stmt = text(sql_query)
+    result = session.execute(stmt, {"search": search})
+    session.commit()
+    return result.all()
+
+def getRelated(quote):
+    session = databaseConnector.get_session()
+    sql_query = "SELECT content FROM quote WHERE author = :author AND id <> :id"
+    stmt = text(sql_query)
+    relateds_result = session.execute(stmt, {"author": quote.author, "id": quote.id})
+    relateds = relateds_result.all()
+    return relateds
 
 
+def getQuote(quote_id):
+    session = databaseConnector.get_session()
+    sql_query = "SELECT * FROM quote WHERE id = :id"
+    stmt = text(sql_query)
+    db_result = session.execute(stmt, {"id": quote_id})
+    quote = db_result.first()
+    return quote
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
@@ -104,21 +129,14 @@ quotes = [
 
 
 @app.get("/quote/{quote_id}", response_class=HTMLResponse)
-async def home(request: Request, quote_id: int):
-    quote = None
-    for q in quotes:
-        if q["id"] == quote_id:
-            quote = q
-            break
+def quote(request: Request, quote_id: int):
+    quote = getQuote(quote_id)
+    relateds = getRelated(quote)
 
-    related = []
-    for q in quotes:
-        if q["author"] == quote["author"] and q["id"] != quote["id"]:
-            related.append(q)
     return templates.TemplateResponse(
         request,
         "quote.html",
-        {"title": "quote", "quote": quote, "related": related},
+        {"title": "quote", "quote": quote, "related": relateds},
     )
 
 
@@ -126,19 +144,10 @@ async def home(request: Request, quote_id: int):
 async def submit(request: Request, author: Annotated[str, Form()], quote: Annotated[str, Form()],
                  context: Annotated[str, Form()],
                  date: Annotated[str, Form()]):
-    ids = []
-    for q in quotes:
-        ids.append(q["id"])
 
-    new_id = int(max(ids) + 1)
 
-    quote_object = buildQuote(new_id, author, quote, date, context)
-
-    print(quote_object)
-    print(quoteExists(quotes, quote_object))
-
-    if not quoteExists(quotes, quote_object):
-        appendToQuote(quotes, new_id, author, quote, date, context)
+    if not quoteExists(quote, author):
+        new_id = appendToQuote(author, quote, date, context)
         return RedirectResponse(
             '/quote/' + str(new_id),
             status_code=int(302)
@@ -153,14 +162,22 @@ async def submit(request: Request, author: Annotated[str, Form()], quote: Annota
 
 @app.get("/home", response_class=HTMLResponse)
 async def home(request: Request):
-    rand_quote = random.choice(quotes)
-    person_of_month = random.choice(quotes)["author"]
-    quotes_from_pom = []
-    counter = 0
-    for q in quotes:
-        if q["author"] == person_of_month and counter < 4:
-            quotes_from_pom.append(q)
-            counter += 1
+    session = databaseConnector.get_session()
+
+    sql_query = "SELECT * FROM quote ORDER BY RANDOM() LIMIT 1"
+    stmt = text(sql_query)
+    rand_quote_result = session.execute(stmt)
+    rand_quote = rand_quote_result.first()
+
+    sql_query = "SELECT AUTHOR FROM quote ORDER BY RANDOM() LIMIT 1"
+    stmt = text(sql_query)
+    POM_result = session.execute(stmt)
+    person_of_month = POM_result.first().author
+
+    sql_query = "SELECT * FROM quote WHERE author = :author"
+    stmt = text(sql_query)
+    POM_quotes_results = session.execute(stmt, {"author": person_of_month})
+    quotes_from_pom = POM_quotes_results.all()
 
     print(rand_quote)
     return templates.TemplateResponse(
@@ -190,7 +207,7 @@ async def home(request: Request):
 
 @app.get("/results/{search}", response_class=HTMLResponse)
 async def home(request: Request, search: str):
-    results = searchQuotes(quotes, search)
+    results = searchQuotes(search)
     print(results)
 
     return templates.TemplateResponse(
@@ -203,9 +220,11 @@ async def home(request: Request, search: str):
 @app.post("/search", response_class=HTMLResponse)
 async def submit(request: Request, search: Annotated[str, Form()]):
     print(search)
-    return RedirectResponse(
-        '/results/' + quote(search.strip(), safe=""),
-        status_code=int(302)
+    quotes = searchQuotes(search)
+    return templates.TemplateResponse(
+        request,
+        "search_results.html",
+        {"title": "All quotes", "quotes": quotes},
     )
 
 
