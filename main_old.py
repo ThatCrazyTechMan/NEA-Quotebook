@@ -4,18 +4,42 @@ from datetime import date
 from pathlib import Path
 
 from sqlalchemy.dialects.mysql import insert
+from sqlalchemy.orm import Session
 
 import templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi import FastAPI, Request, Form
 from fastapi.templating import Jinja2Templates
-from typing import Annotated
+from typing import Annotated, Any, Sequence
 from urllib.parse import quote
 import databaseConnector
-from sqlalchemy import text
+from sqlalchemy import text, Row
+async def getQuoteFromAuthor(author):
+    session = databaseConnector.get_session()
+    sql_query = "SELECT * FROM quote WHERE author = :author"
+    stmt = text(sql_query)
+    POM_quotes_results = session.execute(stmt, {"author": author})
+    quotes_from_pom = POM_quotes_results.all()
+    return quotes_from_pom
 
 
+async def getRandomAuthor():
+    session = databaseConnector.get_session()
+    sql_query = "SELECT AUTHOR FROM quote ORDER BY RANDOM() LIMIT 1"
+    stmt = text(sql_query)
+    POM_result = session.execute(stmt)
+    person_of_month = POM_result.first().author
+    return person_of_month
+
+
+async def getRandomQuote():
+    session = databaseConnector.get_session()
+    sql_query = "SELECT * FROM quote ORDER BY RANDOM() LIMIT 1"
+    stmt = text(sql_query)
+    rand_quote_result = session.execute(stmt)
+    rand_quote = rand_quote_result.first()
+    return rand_quote
 
 def appendToQuote(author, quote, date, context):
     session = databaseConnector.get_session()
@@ -164,20 +188,11 @@ async def submit(request: Request, author: Annotated[str, Form()], quote: Annota
 async def home(request: Request):
     session = databaseConnector.get_session()
 
-    sql_query = "SELECT * FROM quote ORDER BY RANDOM() LIMIT 1"
-    stmt = text(sql_query)
-    rand_quote_result = session.execute(stmt)
-    rand_quote = rand_quote_result.first()
+    rand_quote = await getRandomQuote()
 
-    sql_query = "SELECT AUTHOR FROM quote ORDER BY RANDOM() LIMIT 1"
-    stmt = text(sql_query)
-    POM_result = session.execute(stmt)
-    person_of_month = POM_result.first().author
+    person_of_month = await getRandomAuthor()
 
-    sql_query = "SELECT * FROM quote WHERE author = :author"
-    stmt = text(sql_query)
-    POM_quotes_results = session.execute(stmt, {"author": person_of_month})
-    quotes_from_pom = POM_quotes_results.all()
+    quotes_from_pom = await getQuoteFromAuthor(person_of_month)
 
     print(rand_quote)
     return templates.TemplateResponse(
@@ -185,6 +200,33 @@ async def home(request: Request):
         "home.html",
         {"title": "Home", "rand": rand_quote, "person_of_month": person_of_month, "POM_quotes": quotes_from_pom},
     )
+
+
+async def getQuoteFromAuthor(author):
+    session = databaseConnector.get_session()
+    sql_query = "SELECT * FROM quote WHERE author = :author"
+    stmt = text(sql_query)
+    POM_quotes_results = session.execute(stmt, {"author": author})
+    quotes_from_pom = POM_quotes_results.all()
+    return quotes_from_pom
+
+
+async def getRandomAuthor():
+    session = databaseConnector.get_session()
+    sql_query = "SELECT AUTHOR FROM quote ORDER BY RANDOM() LIMIT 1"
+    stmt = text(sql_query)
+    POM_result = session.execute(stmt)
+    person_of_month = POM_result.first().author
+    return person_of_month
+
+
+async def getRandomQuote():
+    session = databaseConnector.get_session()
+    sql_query = "SELECT * FROM quote ORDER BY RANDOM() LIMIT 1"
+    stmt = text(sql_query)
+    rand_quote_result = session.execute(stmt)
+    rand_quote = rand_quote_result.first()
+    return rand_quote
 
 
 @app.get("/", response_class=HTMLResponse)
