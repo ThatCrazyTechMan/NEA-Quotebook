@@ -15,6 +15,10 @@ from typing import Annotated, Any, Sequence
 from urllib.parse import quote
 import databaseConnector
 from sqlalchemy import text, Row
+import hashlib
+from starlette.middleware.sessions import SessionMiddleware
+
+
 async def getQuoteFromAuthor(author):
     session = databaseConnector.get_session()
     sql_query = "SELECT * FROM quote WHERE author = :author"
@@ -102,9 +106,44 @@ def getQuote(quote_id):
     db_result = session.execute(stmt, {"id": quote_id})
     quote = db_result.first()
     return quote
+
+async def getQuoteFromAuthor(author):
+    session = databaseConnector.get_session()
+    sql_query = "SELECT * FROM quote WHERE author = :author"
+    stmt = text(sql_query)
+    POM_quotes_results = session.execute(stmt, {"author": author})
+    quotes_from_pom = POM_quotes_results.all()
+    return quotes_from_pom
+
+
+async def getRandomAuthor():
+    session = databaseConnector.get_session()
+    sql_query = "SELECT AUTHOR FROM quote ORDER BY RANDOM() LIMIT 1"
+    stmt = text(sql_query)
+    POM_result = session.execute(stmt)
+    person_of_month = POM_result.first().author
+    return person_of_month
+
+
+async def getRandomQuote():
+    session = databaseConnector.get_session()
+    sql_query = "SELECT * FROM quote ORDER BY RANDOM() LIMIT 1"
+    stmt = text(sql_query)
+    rand_quote_result = session.execute(stmt)
+    rand_quote = rand_quote_result.first()
+    return rand_quote
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
+app.add_middleware(
+    SessionMiddleware,
+    secret_key="secret"
+)
+
+
 templates = Jinja2Templates(directory="templates")
+
+
+
 
 quotes = [
     {
@@ -186,8 +225,6 @@ async def submit(request: Request, author: Annotated[str, Form()], quote: Annota
 
 @app.get("/home", response_class=HTMLResponse)
 async def home(request: Request):
-    session = databaseConnector.get_session()
-
     rand_quote = await getRandomQuote()
 
     person_of_month = await getRandomAuthor()
@@ -200,35 +237,6 @@ async def home(request: Request):
         "home.html",
         {"title": "Home", "rand": rand_quote, "person_of_month": person_of_month, "POM_quotes": quotes_from_pom},
     )
-
-
-async def getQuoteFromAuthor(author):
-    session = databaseConnector.get_session()
-    sql_query = "SELECT * FROM quote WHERE author = :author"
-    stmt = text(sql_query)
-    POM_quotes_results = session.execute(stmt, {"author": author})
-    quotes_from_pom = POM_quotes_results.all()
-    return quotes_from_pom
-
-
-async def getRandomAuthor():
-    session = databaseConnector.get_session()
-    sql_query = "SELECT AUTHOR FROM quote ORDER BY RANDOM() LIMIT 1"
-    stmt = text(sql_query)
-    POM_result = session.execute(stmt)
-    person_of_month = POM_result.first().author
-    return person_of_month
-
-
-async def getRandomQuote():
-    session = databaseConnector.get_session()
-    sql_query = "SELECT * FROM quote ORDER BY RANDOM() LIMIT 1"
-    stmt = text(sql_query)
-    rand_quote_result = session.execute(stmt)
-    rand_quote = rand_quote_result.first()
-    return rand_quote
-
-
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse(
@@ -240,11 +248,81 @@ async def home(request: Request):
 
 @app.get("/login", response_class=HTMLResponse)
 async def home(request: Request):
+    rand_quote = await getRandomQuote()
+    print(rand_quote)
     return templates.TemplateResponse(
         request,
         "login.html",
-        {"title": "Login"},
+        {"title": "Login", "rand_quote": rand_quote},
     )
+
+@app.post("/user", response_class=HTMLResponse)
+async def user(request: Request, username: Annotated[str, Form()]):
+    print(f"{username} tried logging in!!")
+    session = databaseConnector.get_session()
+    sql_query = "SELECT COUNT(*) FROM users WHERE username = :username"
+    stmt = text(sql_query)
+    user_result = session.execute(stmt, {"username": username})
+    user_count = user_result.scalar_one()
+
+    if user_count == 0:
+        return templates.TemplateResponse(
+            request,
+            "signup.html",
+            {"title": "Create", "username": username},
+        )
+    else:
+        return templates.TemplateResponse(
+            request,
+            "signin.html",
+            {"title": "Login", "username": username},
+        )
+
+@app.post("/signin", response_class=HTMLResponse)
+async def signin(request: Request, username: Annotated[str, Form()], password: Annotated[str, Form()]):
+    password_hash = hashlib.sha256(password.encode()).hexdigest()
+    session = databaseConnector.get_session()
+    sql_query = "SELECT * FROM users WHERE username = username AND password_hash = password_hash"
+    stmt = text(sql_query)
+    signin_result = session.execute(stmt, {"username": username, "password_hash": password_hash})
+    user = signin_result.first()
+    if user is not None:
+        print(f"{username} logged in!!")
+        request.session["username"] = username
+        return RedirectResponse(
+            '/home',
+            status_code=int(302)
+        )
+    else:
+        return templates.TemplateResponse(
+            request,
+            "signin.html",
+            {"title": "Login", "username": username},
+        )
+
+@app.post("/signup", response_class=HTMLResponse)
+async def signin(request: Request, username: Annotated[str, Form()], password1: Annotated[str, Form()], password2: Annotated[str, Form()]):
+    if password1 != password2:
+        return templates.TemplateResponse(
+            request,
+            "signup.html",
+            {"title": "Signup", "username": username}
+        )
+    else:
+        password_hash = hashlib.sha256(password1.encode()).hexdigest()
+        session = databaseConnector.get_session()
+        sql_query = "INSERT INTO users(username, password_hash) VALUES (:username, :password_hash)"
+        stmt = text(sql_query)
+        session.execute(stmt, {"username": username, "password_hash": password_hash})
+        session.commit()
+        print(f"{username} created!!")
+        return RedirectResponse(
+            '/login',
+            status_code=int(302)
+
+        )
+
+
 
 
 @app.get("/results/{search}", response_class=HTMLResponse)

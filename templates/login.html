@@ -22,32 +22,26 @@
         <div class="card-title text-center">
             <figure class="text-center">
                 <blockquote class="blockquote">
-                    <h3>"I have never had watermelon before"</h3>
+                    <h3>"{{rand_quote.content}}"</h3>
                 </blockquote>
                 <figcaption class="blockquote-footer">
-                    Mat Gilbert
+                    {{rand_quote.author}}
                 </figcaption>
             </figure>
             <h4>Log in or Sign up</h4>
         </div>
         <div class="card-body">
-            <form>
+            <form method="POST" action="/user">
                 <div class="mb-3">
-                    <input type="text" class="form-control" placeholder="Email" aria-label="Email">
-                </div>
-                <div class="mb-3">
-                    <input type="password" class="form-control" placeholder="Password" aria-label="Password">
+                    <input type="text" id="username" name="username" class="form-control" placeholder="Username" aria-label="Username">
                 </div>
                 <div class="mb-3">
-                    <a class="btn btn-primary" href="http://localhost:8000/home" role="button">Login</a>
+                    <button type="submit" class="btn btn-primary btn-md rounded-4">Login or Sign up</button>
                 </div>
-                <div class="col-md-auto">
-                    <a href="#" class="link-secondary">Forgot password</a>
-                </div>
-<!-- End of template -->
-</body>
-</html>
             </form>
         </div>
     </div>
 </div>
+<!-- End of template -->
+</body>
+</html>
