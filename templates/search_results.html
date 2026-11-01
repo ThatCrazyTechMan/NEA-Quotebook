@@ -20,9 +20,20 @@
 <div class="container py-4">
     <div class="container">
         <div class="col-5">
-            <input type="text" class="form-control form-control-lg rounded-pill shadow-sm px-4"
-                   placeholder="Search for tags, people or specific quotes"
-                   aria-label="Search for tags, people or specific quotes">
+            <div class="row">
+                <div>
+                    <form id="search_form" action="/search" method="POST">
+                        <label for="search"></label>
+                        <input type="text" required class="form-control form-control-lg rounded-pill px-4"
+                                placeholder="Search for tags, people or specific quotes"
+                                aria-label="Search for tags, people or specific quotes"
+                                id="search" name="search">
+                    </form>
+                </div>
+                <div class="col-5">
+                    <button type="submit" form="search_form" class="btn btn-outline-secondary btn-lg rounded-4">Search</button>
+                </div>
+            </div>
         </div>
     </div>
     <div class="container py-4">
@@ -45,15 +56,10 @@
                         </div>
                         <div class="card-footer text-muted">
                             <div class="row">
-                                <div class="col-4">
-                                    <span class="badge rounded-pill text-bg-primary">Tag</span>
-                                    <span class="badge rounded-pill text-bg-primary">Tag</span>
-                                    <span class="badge rounded-pill text-bg-primary">Tag</span>
+                                <div class="col-6">
+                                    <p class="text-left">{{q.date}}</p>
                                 </div>
-                                <div class="col-4">
-                                    <p class="text-center">{{q.date}}</p>
-                                </div>
-                                <div class="col-4">
+                                <div class="col-6">
                                     <p class="text-end">- {{q.author}}</p>
                                 </div>
                             </div>

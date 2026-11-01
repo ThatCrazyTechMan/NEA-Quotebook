@@ -45,27 +45,15 @@ async def getRandomQuote():
     rand_quote = rand_quote_result.first()
     return rand_quote
 
-def appendToQuote(author, quote, date, context):
+def appendToQuote(author, quote, date, context, username):
     session = databaseConnector.get_session()
-
-    sql_query = "INSERT INTO quote(author, content, date, context) VALUES(:author, :content, :date, :context) RETURNING id"
+    sql_query = "INSERT INTO quote(author, content, date, context, username) VALUES(:author, :content, :date, :context, :username) RETURNING id"
     stmt = text(sql_query)
-    result = session.execute(stmt, {"author": author, "content": quote, "date": date, "context": context})
+    result = session.execute(stmt, {"author": author, "content": quote, "date": date, "context": context, "username": username  })
     new_id=result.scalar_one()
     session.commit()
 
     return new_id
-
-def buildQuote(id, author, quote, date, context):
-    output = {
-        "id": id,
-        "author": author,
-        "content": quote,
-        "date": date,
-        "context": context
-    }
-    return output
-
 
 def quoteExists(content, author):
        session = databaseConnector.get_session()
@@ -210,7 +198,9 @@ async def submit(request: Request, author: Annotated[str, Form()], quote: Annota
 
 
     if not quoteExists(quote, author):
-        new_id = appendToQuote(author, quote, date, context)
+        username = request.session["username"]
+        print(username)
+        new_id = appendToQuote(author, quote, date, context, username)
         return RedirectResponse(
             '/quote/' + str(new_id),
             status_code=int(302)
