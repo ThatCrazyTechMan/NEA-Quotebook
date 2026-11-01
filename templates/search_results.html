@@ -12,26 +12,23 @@
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
         crossorigin="anonymous"></script>
 <!-- Start of template -->
-<a href="http://localhost:8000/quote" class="btn btn-primary">Quote</a>
-<a href="http://localhost:8000/" class="btn btn-primary">Index</a>
-<a class="btn btn-primary" href="http://localhost:8000/login" role="button">Login</a>
-<a class="btn btn-primary" href="http://localhost:8000/home" role="button">Home</a>
-
 <div class="container py-4">
     <div class="container">
-        <div class="col-5">
-            <div class="row">
-                <div>
+        <div class="col-2">
+            <a href="http://localhost:8000/home" class="btn btn-primary">Home</a>
+        </div>
+        <div class="row">
+            <div class="col-5">
                     <form id="search_form" action="/search" method="POST">
                         <label for="search"></label>
-                        <input type="text" required class="form-control form-control-lg rounded-pill px-4"
+                        <input type="text" required class="form-control form-control-lg align-items-center h-50 rounded-pill px-4"
                                 placeholder="Search for tags, people or specific quotes"
                                 aria-label="Search for tags, people or specific quotes"
                                 id="search" name="search">
                     </form>
-                </div>
+            </div>
                 <div class="col-5">
-                    <button type="submit" form="search_form" class="btn btn-outline-secondary btn-lg rounded-4">Search</button>
+                    <button type="submit" form="search_form" class="btn h-100 align-items-center btn-outline-secondary btn-xl rounded-4">Search</button>
                 </div>
             </div>
         </div>

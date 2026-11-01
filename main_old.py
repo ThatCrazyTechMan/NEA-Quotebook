@@ -272,10 +272,11 @@ async def user(request: Request, username: Annotated[str, Form()]):
 async def signin(request: Request, username: Annotated[str, Form()], password: Annotated[str, Form()]):
     password_hash = hashlib.sha256(password.encode()).hexdigest()
     session = databaseConnector.get_session()
-    sql_query = "SELECT * FROM users WHERE username = username AND password_hash = password_hash"
+    sql_query = "SELECT * FROM users WHERE username = :username AND :password_hash = password_hash"
     stmt = text(sql_query)
     signin_result = session.execute(stmt, {"username": username, "password_hash": password_hash})
     user = signin_result.first()
+    print(user)
     if user is not None:
         print(f"{username} logged in!!")
         request.session["username"] = username
