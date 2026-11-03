@@ -48,9 +48,9 @@ async def submit(request: Request, author: Annotated[str, Form()], quote: Annota
 
 
     if not functions.quoteExists(quote, author):
-        username = request.session["username"]
-        print(username)
-        new_id = functions.appendToQuote(author, quote, date, context, username)
+        user_id = request.session["user_id"]
+        print(user_id)
+        new_id = functions.appendToQuote(author, quote, date, context, user_id)
         return RedirectResponse(
             '/quote/' + str(new_id),
             status_code=int(302)
@@ -71,11 +71,12 @@ async def home(request: Request):
 
     quotes_from_pom = await functions.getQuoteFromAuthor(person_of_month)
 
+
     print(rand_quote)
     return templates.TemplateResponse(
         request,
         "home.html",
-        {"title": "Home", "rand": rand_quote, "person_of_month": person_of_month, "POM_quotes": quotes_from_pom},
+        {"title": "Home", "rand": rand_quote, "person_of_month": person_of_month, "POM_quotes": quotes_from_pom, "username": str(functions.getUsernameFromID(user_id = request.session["user_id"]))},
     )
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
@@ -129,7 +130,7 @@ async def signin(request: Request, username: Annotated[str, Form()], password: A
     print(user)
     if user is not None:
         print(f"{username} logged in!!")
-        request.session["username"] = username
+        request.session["user_id"] = str(functions.getUser_IDFromUsername(username))
         return RedirectResponse(
             '/home',
             status_code=int(302)

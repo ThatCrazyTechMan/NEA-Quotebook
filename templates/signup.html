@@ -20,13 +20,13 @@
         <div class="card-body">
             <form method="POST" action="/signup">
                 <div class="mb-3">
-                    <input id="username" name="username" type="text" class="form-control" value="{{username}}" placeholder="[Username]" aria-label="Username">
+                    <input id="username" name="username" type="text" class="form-control" value="{{username}}" placeholder="[Username]" aria-label="Username" required>
                 </div>
                 <div class="mb-3">
-                    <input id="password1" name="password1" type="password" class="form-control" placeholder="Password" aria-label="Password">
+                    <input id="password1" name="password1" type="password" class="form-control" placeholder="Password" aria-label="Password" required>
                 </div>
                 <div class="mb-3">
-                    <input id="password2" name="password2" type="password" class="form-control" placeholder="Re-enter Password" aria-label="Re-enter Password">
+                    <input id="password2" name="password2" type="password" class="form-control" placeholder="Re-enter Password" aria-label="Re-enter Password" required>
                 </div>
                 <div class="mb-3">
                     <button type="submit"  class="btn btn-outline-primary btn-sm rounded-4">Sign up</button>

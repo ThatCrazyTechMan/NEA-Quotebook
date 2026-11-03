@@ -30,11 +30,11 @@ async def getRandomQuote():
     rand_quote = rand_quote_result.first()
     return rand_quote
 
-def appendToQuote(author, quote, date, context, username):
+def appendToQuote(author, quote, date, context, user_id):
     session = databaseConnector.get_session()
-    sql_query = "INSERT INTO quote(author, content, date, context, username) VALUES(:author, :content, :date, :context, :username) RETURNING id"
+    sql_query = "INSERT INTO quote(author, content, date, context, user_id) VALUES(:author, :content, :date, :context, :user_id) RETURNING id"
     stmt = text(sql_query)
-    result = session.execute(stmt, {"author": author, "content": quote, "date": date, "context": context, "username": username  })
+    result = session.execute(stmt, {"author": author, "content": quote, "date": date, "context": context, "user_id": user_id})
     new_id=result.scalar_one()
     session.commit()
 
@@ -96,6 +96,24 @@ async def getRandomAuthor():
     POM_result = session.execute(stmt)
     person_of_month = POM_result.first().author
     return person_of_month
+
+
+def getUsernameFromID(user_id):
+    session = databaseConnector.get_session()
+    sql_query = "SELECT username FROM users WHERE user_id = :user_id"
+    stmt = text(sql_query)
+    username_result = session.execute(stmt, {"user_id": user_id})
+    username = username_result.scalar_one()
+    return username
+
+def getUser_IDFromUsername(username):
+    session = databaseConnector.get_session()
+    sql_query = "SELECT user_id FROM users WHERE username = :username"
+    stmt = text(sql_query)
+    user_id_result = session.execute(stmt, {"username": username})
+    user_id = user_id_result.scalar_one()
+    return user_id
+
 
 
 async def getRandomQuote():
