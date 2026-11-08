@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>All quotes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+<!-- Start of template -->
+<div class="container py-4">
+    <div class="container">
+        <div class="col-2">
+            <a href="http://localhost:8000/home" class="btn btn-primary">Home</a>
+        </div>
+    </div>
+    <div class="container py-4">
+        <div class="p-5 rounded-4 shadow-lg">
+            <div class="row mt-4">
+                {% for q in quotes %}
+                <div class="col-6">
+                    <div class="card rounded-4">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-8 text-truncate">
+                                    <h5>{{q.content}} </h5>
+                                </div>
+                                <div class="col-3 text-end">
+                                    <a href="http://localhost:8000/quote/{{q.id}}" class="btn btn-sm btn-primary">Go
+                                        to
+                                        quote</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer text-muted">
+                            <div class="row">
+                                <div class="col-6">
+                                    <p class="text-left">{{q.date}}</p>
+                                </div>
+                                <div class="col-6">
+                                    <p class="text-end">- {{q.author}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End of template -->
+</body>
+</html>

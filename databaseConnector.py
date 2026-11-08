@@ -12,7 +12,7 @@ def get_engine(username, password, host, port, database):
     if not database_exists(url):
         create_database(url)
 
-    engine = create_engine(url, pool_size=10, echo=True)
+    engine = create_engine(url, pool_size=10, echo=False)
     return engine
 
 def get_engine_from_settings():

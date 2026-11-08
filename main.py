@@ -11,10 +11,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi import FastAPI, Request, Form
 from fastapi.templating import Jinja2Templates
-from typing import Annotated, Any, Sequence
-from urllib.parse import quote
+from typing import Annotated
 import databaseConnector
-from sqlalchemy import text, Row
+from sqlalchemy import text
 import hashlib
 from starlette.middleware.sessions import SessionMiddleware
 import functions
@@ -30,9 +29,9 @@ app.add_middleware(
 templates = Jinja2Templates(directory="templates")
 
 @app.get("/quote/{quote_id}", response_class=HTMLResponse)
-def quote(request: Request, quote_id: int):
-    quote = functions.getQuote(quote_id)
-    relateds = functions.getRelated(quote)
+async def quote(request: Request, quote_id: int):
+    quote = await functions.getQuote(quote_id)
+    relateds = await functions.getRelated(quote)
 
     return templates.TemplateResponse(
         request,
@@ -47,10 +46,10 @@ async def submit(request: Request, author: Annotated[str, Form()], quote: Annota
                  date: Annotated[str, Form()]):
 
 
-    if not functions.quoteExists(quote, author):
+    if not await functions.quoteExists(quote, author):
         user_id = request.session["user_id"]
         print(user_id)
-        new_id = functions.appendToQuote(author, quote, date, context, user_id)
+        new_id = await functions.appendToQuote(author, quote, date, context, user_id)
         return RedirectResponse(
             '/quote/' + str(new_id),
             status_code=int(302)
@@ -66,17 +65,16 @@ async def submit(request: Request, author: Annotated[str, Form()], quote: Annota
 @app.get("/home", response_class=HTMLResponse)
 async def home(request: Request):
     rand_quote = await functions.getRandomQuote()
-
     person_of_month = await functions.getRandomAuthor()
-
     quotes_from_pom = await functions.getQuoteFromAuthor(person_of_month)
 
-
+    user_id = request.session["user_id"]
+    username = await functions.getUsernameFromID(user_id)
     print(rand_quote)
     return templates.TemplateResponse(
         request,
         "home.html",
-        {"title": "Home", "rand": rand_quote, "person_of_month": person_of_month, "POM_quotes": quotes_from_pom, "username": str(functions.getUsernameFromID(user_id = request.session["user_id"]))},
+        {"title": "Home", "rand": rand_quote, "person_of_month": person_of_month, "POM_quotes": quotes_from_pom, "username": username},
     )
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
@@ -88,7 +86,7 @@ async def home(request: Request):
 
 
 @app.get("/login", response_class=HTMLResponse)
-async def home(request: Request):
+async def login(request: Request):
     rand_quote = await functions.getRandomQuote()
     print(rand_quote)
     return templates.TemplateResponse(
@@ -127,10 +125,9 @@ async def signin(request: Request, username: Annotated[str, Form()], password: A
     stmt = text(sql_query)
     signin_result = session.execute(stmt, {"username": username, "password_hash": password_hash})
     user = signin_result.first()
-    print(user)
     if user is not None:
         print(f"{username} logged in!!")
-        request.session["user_id"] = str(functions.getUser_IDFromUsername(username))
+        request.session["user_id"] = str(await functions.getUser_IDFromUsername(username))
         return RedirectResponse(
             '/home',
             status_code=int(302)
@@ -165,11 +162,21 @@ async def signin(request: Request, username: Annotated[str, Form()], password1: 
         )
 
 
+@app.get("/logout", response_class=HTMLResponse)
+async def logout(request: Request):
+    request.session["user_id"] = None
+    print("User id cleared from session")
+    return RedirectResponse(
+        "/login",
+        status_code = int(302)
+    )
+
+
 
 
 @app.get("/results/{search}", response_class=HTMLResponse)
 async def home(request: Request, search: str):
-    results = functions.searchQuotes(search)
+    results = await functions.searchQuotes(search)
     print(results)
 
     return templates.TemplateResponse(
@@ -182,7 +189,7 @@ async def home(request: Request, search: str):
 @app.post("/search", response_class=HTMLResponse)
 async def submit(request: Request, search: Annotated[str, Form()]):
     print(search)
-    quotes = functions.searchQuotes(search)
+    quotes = await functions.searchQuotes(search)
     return templates.TemplateResponse(
         request,
         "search_results.html",
@@ -197,3 +204,12 @@ async def exists(request: Request):
         "quote_exists.html",
         {"title": "Quote Exists"},
     )
+
+@app.get("/all-quotes", response_class=HTMLResponse)
+async def all_quotes(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "all_quotes.html",
+        {"title": "All Quotes", "quotes": await functions.getAllQuotes()},
+    )
+

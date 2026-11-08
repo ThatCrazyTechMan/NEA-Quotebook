@@ -1,4 +1,4 @@
-from starlette.middleware.sessions import SessionMiddleware
+
 import databaseConnector
 from sqlalchemy import text
 
@@ -30,7 +30,7 @@ async def getRandomQuote():
     rand_quote = rand_quote_result.first()
     return rand_quote
 
-def appendToQuote(author, quote, date, context, user_id):
+async def appendToQuote(author, quote, date, context, user_id):
     session = databaseConnector.get_session()
     sql_query = "INSERT INTO quote(author, content, date, context, user_id) VALUES(:author, :content, :date, :context, :user_id) RETURNING id"
     stmt = text(sql_query)
@@ -40,7 +40,7 @@ def appendToQuote(author, quote, date, context, user_id):
 
     return new_id
 
-def quoteExists(content, author):
+async def quoteExists(content, author):
        session = databaseConnector.get_session()
        sql_query = "SELECT COUNT(*) FROM quote WHERE content = :content AND author = :author"
        stmt = text(sql_query)
@@ -54,7 +54,7 @@ def quoteExists(content, author):
            return False
 
 
-def searchQuotes(search):
+async def searchQuotes(search):
     session = databaseConnector.get_session()
     search = f"%{search}%"
     sql_query = "SELECT * FROM quote WHERE content ILIKE :search OR author ILIKE :search"
@@ -63,7 +63,7 @@ def searchQuotes(search):
     session.commit()
     return result.all()
 
-def getRelated(quote):
+async def getRelated(quote):
     session = databaseConnector.get_session()
     sql_query = "SELECT content FROM quote WHERE author = :author AND id <> :id"
     stmt = text(sql_query)
@@ -72,7 +72,7 @@ def getRelated(quote):
     return relateds
 
 
-def getQuote(quote_id):
+async def getQuote(quote_id):
     session = databaseConnector.get_session()
     sql_query = "SELECT * FROM quote WHERE id = :id"
     stmt = text(sql_query)
@@ -98,7 +98,7 @@ async def getRandomAuthor():
     return person_of_month
 
 
-def getUsernameFromID(user_id):
+async def getUsernameFromID(user_id):
     session = databaseConnector.get_session()
     sql_query = "SELECT username FROM users WHERE user_id = :user_id"
     stmt = text(sql_query)
@@ -106,7 +106,7 @@ def getUsernameFromID(user_id):
     username = username_result.scalar_one()
     return username
 
-def getUser_IDFromUsername(username):
+async def getUser_IDFromUsername(username):
     session = databaseConnector.get_session()
     sql_query = "SELECT user_id FROM users WHERE username = :username"
     stmt = text(sql_query)
@@ -123,3 +123,11 @@ async def getRandomQuote():
     rand_quote_result = session.execute(stmt)
     rand_quote = rand_quote_result.first()
     return rand_quote
+
+async def getAllQuotes():
+    session = databaseConnector.get_session()
+    sql_query = "SELECT * FROM quote"
+    stmt = text(sql_query)
+    quotes_result = session.execute(stmt)
+    quote = quotes_result.all()
+    return quote
