@@ -1,18 +1,20 @@
 DROP TABLE IF EXISTS users, quote;
-CREATE TABLE users(user_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS users(user_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
                    username VARCHAR(20) NOT NULL,
                    password_hash VARCHAR(64) NOT NULL);
 
 
-CREATE TABLE quote (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
+CREATE TABLE IF NOT EXISTS quote (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
                     author VARCHAR(50) NOT NULL,
                     content VARCHAR(512),
-                    date DATE,
+                    quote_date DATE,
                     context VARCHAR(512),
                     user_id uuid REFERENCES users(user_id));
 
 
-INSERT INTO quote(author, content, date, context) VALUES('Kabir Marathe',
+INSERT INTO users(username, password_hash)
+
+INSERT INTO quote(author, content, quote_date, context) VALUES('Kabir Marathe',
                                                          'I have a great idea, my NEA will be a digital quotebook!! Surely that will give me loads of marks!!',
                                                          '2026-06-10',
                                                          'Little did he know, that this would lead him down a dark path...');

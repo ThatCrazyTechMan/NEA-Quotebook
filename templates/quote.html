@@ -16,7 +16,7 @@
 <div class="container d-flex min-vh-100 flex-column py-4">
     <div class="row mt-5">
         <div class="col-2">
-            <a href="http://localhost:8000/home" class="btn btn-primary">Home</a>
+            <a href="http://localhost:8000/home" class="btn rounded-4 btn-primary">Home</a>
         </div>
         <div class="col-12">
             <p class="text-end">{{quote.date}}</p>
@@ -40,6 +40,11 @@
             <div class="col-6">
                 <p class="text-end" style="font-size: 20pt">- {{quote.author}}</p>
             </div>
+        </div>
+        <div class="col-2 py-4">
+            <form action="/delete" method="POST">
+                <button type="submit" name="{{quote_id}}" id="{{quote_id}}" class="btn btn-outline-danger btn-sm rounded-4">Delete quote</button>
+            </form>
         </div>
     </div>
     <div class="row mt-auto">

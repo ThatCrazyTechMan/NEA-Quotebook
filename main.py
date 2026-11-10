@@ -4,6 +4,7 @@ from datetime import date
 from pathlib import Path
 
 from sqlalchemy.dialects.mysql import insert
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 import templates
@@ -11,9 +12,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi import FastAPI, Request, Form
 from fastapi.templating import Jinja2Templates
-from typing import Annotated
+from typing import Annotated, Any
 import databaseConnector
-from sqlalchemy import text
+from sqlalchemy import text, Row
 import hashlib
 from starlette.middleware.sessions import SessionMiddleware
 import functions
@@ -36,20 +37,20 @@ async def quote(request: Request, quote_id: int):
     return templates.TemplateResponse(
         request,
         "quote.html",
-        {"title": "quote", "quote": quote, "related": relateds},
+        {"title": "quote", "quote": quote, "related": relateds, "quote_id": quote_id},
     )
 
 
 @app.post("/submit", response_class=HTMLResponse)
 async def submit(request: Request, author: Annotated[str, Form()], quote: Annotated[str, Form()],
                  context: Annotated[str, Form()],
-                 date: Annotated[str, Form()]):
+                 quote_date: Annotated[str, Form()]):
 
 
     if not await functions.quoteExists(quote, author):
         user_id = request.session["user_id"]
         print(user_id)
-        new_id = await functions.appendToQuote(author, quote, date, context, user_id)
+        new_id = await functions.appendToQuote(author, quote, quote_date, context, user_id)
         return RedirectResponse(
             '/quote/' + str(new_id),
             status_code=int(302)
@@ -78,10 +79,9 @@ async def home(request: Request):
     )
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    return templates.TemplateResponse(
-        request,
-        "index.html",
-        {"title": "index"},
+    return RedirectResponse(
+        '/login',
+        status_code=int(302)
     )
 
 
@@ -98,12 +98,7 @@ async def login(request: Request):
 @app.post("/user", response_class=HTMLResponse)
 async def user(request: Request, username: Annotated[str, Form()]):
     print(f"{username} tried logging in!!")
-    session = databaseConnector.get_session()
-    sql_query = "SELECT COUNT(*) FROM users WHERE username = :username"
-    stmt = text(sql_query)
-    user_result = session.execute(stmt, {"username": username})
-    user_count = user_result.scalar_one()
-
+    user_count = await functions.checkIfUserExists(username)
     if user_count == 0:
         return templates.TemplateResponse(
             request,
@@ -120,11 +115,8 @@ async def user(request: Request, username: Annotated[str, Form()]):
 @app.post("/signin", response_class=HTMLResponse)
 async def signin(request: Request, username: Annotated[str, Form()], password: Annotated[str, Form()]):
     password_hash = hashlib.sha256(password.encode()).hexdigest()
-    session = databaseConnector.get_session()
-    sql_query = "SELECT * FROM users WHERE username = :username AND :password_hash = password_hash"
-    stmt = text(sql_query)
-    signin_result = session.execute(stmt, {"username": username, "password_hash": password_hash})
-    user = signin_result.first()
+    user = await functions.findUserFromUsernameAndPasswordHash(password_hash, username)
+
     if user is not None:
         print(f"{username} logged in!!")
         request.session["user_id"] = str(await functions.getUser_IDFromUsername(username))
@@ -213,3 +205,19 @@ async def all_quotes(request: Request):
         {"title": "All Quotes", "quotes": await functions.getAllQuotes()},
     )
 
+
+@app.post("/delete", response_class=HTMLResponse)
+async def delete(request: Request, quote_id: Annotated[str, Form()]):
+    if await functions.quoteExistsFromID(quote_id):
+        confirmation = await functions.removeQuote(quote_id)
+        print(confirmation)
+        return RedirectResponse(
+            '/all-quotes',
+            status_code=int(302)
+        )
+    else:
+        print("Quote doesn't exist")
+        return RedirectResponse(
+            '/home',
+            status_code=int(302)
+        )
